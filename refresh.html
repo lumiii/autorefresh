@@ -1,0 +1,481 @@
+<head>
+<link rel="stylesheet" href="https://dl.dropboxusercontent.com/u/25255870/AutoRefresh/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://dl.dropboxusercontent.com/u/25255870/AutoRefresh/bootstrap/css/bootstrap-theme.min.css">
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<script src='https://dl.dropboxusercontent.com/u/25255870/AutoRefresh/bootstrap/js/bootstrap.min.js'></script>
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
+<style>
+        .row-eq-height {
+                display: -webkit-box;
+                display: -webkit-flex;
+                display: -ms-flexbox;
+                display:         flex;
+        }
+
+        .row {
+                margin-bottom: 20px;
+        }
+        .row .row {
+                margin-top: 10px;
+                margin-bottom: 0;
+        }
+
+        [class*="col-"]:not(.list-group-item) {
+                padding-top: 15px;
+                padding-bottom: 15px;
+                background-color: #eee;
+                background-color: rgba(86,61,124,.15);
+                border: 1px solid #ddd;
+                border: 1px solid rgba(86,61,124,.2);
+        }
+
+        #criteriaEditor { 
+                min-height: 100px;
+        }
+
+        #url {
+                width: 80%;
+        }
+
+        #serializedCode {
+                width: 100%;
+        }
+
+        iframe {
+                width:100%;
+                height:500px;
+        }
+
+        input[type=number],
+        input[type=number].form-control {
+                width: 100px;
+        }
+
+        a:link,
+        a:visited,
+        a:hover,
+        a:active {
+                text-decoration: none;
+        }
+</style>
+<script src="https://rawgit.com/ajaxorg/ace-builds/master/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+
+var AutoRefresh = {};
+// storage of DOM elements
+AutoRefresh.DOM = {};
+// storage of native values
+AutoRefresh.values = {};
+// array of plugin values for notification
+AutoRefresh.options = {};
+// array of plugin DOM fields
+AutoRefresh.optionFields = [];
+// array of plugin notifiers
+AutoRefresh.plugins = [];
+// 
+AutoRefresh.availPlugins = ['twilio', 'gmail', 'audio', 'alert'];
+//
+AutoRefresh.baseURL = '';
+//https://dl.dropboxusercontent.com/u/25255870/AutoRefresh/';
+
+AutoRefresh.values.collapsible = 1;
+
+function addScript(url)
+{
+        var s = document.createElement('script');
+        s.src = url;
+        document.body.appendChild(s);
+}
+
+function addScriptText(code)
+{
+        var s = document.createElement('script');
+        s.appendChild(document.createTextNode(code));
+        document.body.appendChild(s);
+}
+
+function loadAllModules()
+{
+        for (var i = 0; i < AutoRefresh.availPlugins.length; i++)
+        {
+                addScript(AutoRefresh.baseURL + AutoRefresh.availPlugins[i] + '.js');
+        }
+}
+
+function iframeLoad()
+{
+        if (AutoRefresh.DOM.async.checked)
+        {
+                var time = 1000 * parseInt(AutoRefresh.DOM.asyncTime.value);
+                setTimeout(checkCriteria, time);
+        }
+        else
+        {
+                checkCriteria();
+        }
+}
+
+function refreshURL()
+{
+        AutoRefresh.DOM.iframe.src = '';
+        AutoRefresh.DOM.iframe.onload = iframeLoad;
+        AutoRefresh.DOM.iframe.src = AutoRefresh.values.url;
+
+        if (domainFromURL(AutoRefresh.DOM.iframe.src) != document.domain)
+        {
+                AutoRefresh.DOM.info.textContent = 'Warning! Different domains will be blocked from scripting';
+                AutoRefresh.DOM.info.className = 'alert alert-danger alert-dismissable';
+                AutoRefresh.DOM.info.style.display = '';
+        }
+        else
+        {
+                AutoRefresh.DOM.info.textContent = '';
+                AutoRefresh.DOM.info.className = 'alert alert-info alert-dismissable';
+                AutoRefresh.DOM.info.style.display = 'none';
+        }
+}
+
+function domainFromURL(url) {
+        var a = document.createElement('a');
+        a.href = url;
+        return a.hostname;
+}
+
+function getNextCollapsibleID()
+{
+        var s = 'collapsible' + AutoRefresh.values.collapsible;
+        AutoRefresh.values.collapsible++;
+        return s;
+}
+
+function init()
+{
+        var elements = document.querySelectorAll('[id]');
+        for (var i = 0; i < elements.length; i++)
+        {
+                var element = elements[i];
+                AutoRefresh.DOM[element.id] = element;
+        }
+        document.querySelector('#start').onclick = startReload;
+        document.querySelector('#stop').onclick = stopReload;
+        document.querySelector('#serialize').onclick = serializeScript;
+        document.querySelector('#deserialize').onclick = deserializeScript;
+
+        AutoRefresh.criteriaEditor = ace.edit("criteriaEditor");
+        AutoRefresh.criteriaEditor.setTheme("ace/theme/tomorrow");
+        AutoRefresh.criteriaEditor.getSession().setMode("ace/mode/javascript");
+        AutoRefresh.criteriaEditor.$blockScrolling = Infinity;
+
+        if (typeof presetDefaults === 'undefined')
+        {
+                var defaults = {};
+                defaults.script = '\/\/ return true for notification\nreturn false;';
+                defaults.url = document.URL;
+                defaults.refreshRate = 30;
+
+                AutoRefresh.defaults = defaults;
+        }
+        else
+        {
+                AutoRefresh.defaults = presetDefaults;
+        }
+
+        setDefaults(AutoRefresh.defaults);
+
+        loadAllModules();
+        serializeScript();
+}
+
+function setDefaults(defaults)
+{
+        AutoRefresh.criteriaEditor.setValue(defaults.script, 0);
+        AutoRefresh.DOM.url.value = defaults.url;
+        AutoRefresh.DOM.refreshRate.value = defaults.refreshRate;
+        updateFields();
+}
+
+function updateFields()
+{
+        AutoRefresh.values.criteria = new Function(AutoRefresh.criteriaEditor.getValue());
+        AutoRefresh.values.url = AutoRefresh.DOM.url.value;
+        AutoRefresh.values.refreshRate = parseInt(AutoRefresh.DOM.refreshRate.value);
+}
+
+function updateOptions()
+{
+        AutoRefresh.options = {};
+        for (var i = 0; i < AutoRefresh.optionFields.length; i++)
+        {
+                var optionField = AutoRefresh.optionFields[i];
+                if (AutoRefresh.options[optionField.module] == null || AutoRefresh.options[optionField.module] == undefined)
+                {
+                        AutoRefresh.options[optionField.module] = {};
+                }
+
+                var field = document.querySelector("#" + AutoRefresh.optionFields[i].id);
+                if (field != null)
+                {
+                        AutoRefresh.options[optionField.module][AutoRefresh.optionFields[i].name] = field.value;
+                }
+        }
+
+        AutoRefresh.options.message = AutoRefresh.DOM.message.value;
+
+        for (var i = 0; i < AutoRefresh.plugins.length; i++)
+        {
+                var plugin = AutoRefresh.plugins[i];
+                plugin.enabled = plugin.toggleElement.checked;
+        }
+}
+
+function serializeScript()
+{
+        var s = AutoRefresh.criteriaEditor.getValue();
+        AutoRefresh.DOM.serializedCode.value = btoa(s);
+}
+
+function deserializeScript()
+{
+        var s = atob(AutoRefresh.DOM.serializedCode.value);
+        AutoRefresh.criteriaEditor.setValue(s);
+}
+
+function registerField(module, name, id)
+{
+        var field = {};
+        field.module = module;
+        field.name = name;
+        field.id = id;
+        AutoRefresh.optionFields.push(field);
+}
+
+function registerPlugin(plugin, element, title)
+{
+        var newPlugin = {}
+        newPlugin.enabled = false;
+        newPlugin.notify = plugin;
+
+        var nextID = getNextCollapsibleID();
+
+        var d = document.createElement('div');
+        d.className = 'panel panel-default list-group-item';
+
+        var htmlStr = "<div class='bg-info'>";
+        htmlStr += "<a class='h4' data-toggle='collapse' href='#" + nextID + "'>";        
+        htmlStr += "<div class='panel-heading'>";
+        htmlStr += "<label class='checkbox-inline'>";
+        htmlStr += "<input type='checkbox' data-toggle='toggle' data-size='mini'></input>";
+        htmlStr += "</label>";
+
+        htmlStr += title;
+
+        htmlStr += "</div>";
+        htmlStr += "</a>";        
+        htmlStr += "</div>";
+
+        htmlStr += "<div class='panel-body alert alert-success collapse' id='" + nextID + "'>";
+        htmlStr += "</div>";
+
+        d.innerHTML = htmlStr;
+
+        var body = d.querySelector('.panel-body');
+        body.appendChild(element);
+
+        var newButton = document.createElement('button');
+        newButton.textContent = 'Test notification';
+        newButton.className = 'btn btn-primary';
+        newButton.onclick = function(e){ 
+                updateOptions(); 
+                plugin(AutoRefresh.options); 
+        };
+
+        body.appendChild(newButton);
+
+        AutoRefresh.DOM.plugins.appendChild(d);
+
+        var heading = d.querySelector('.panel-heading');
+
+        newPlugin.toggleElement = heading.querySelector('input[type=checkbox]');
+        $(newPlugin.toggleElement).bootstrapToggle();
+        AutoRefresh.plugins.push(newPlugin);
+}
+
+function checkCriteria()
+{
+        if (AutoRefresh.values.criteria != null)
+        {
+                AutoRefresh.DOM.iframeDocument = AutoRefresh.DOM.iframe.contentDocument;
+                if (AutoRefresh.values.criteria())
+                {
+                        notifyPlugins();
+                        // TODO: make this optional
+                        stopReload();
+                        AutoRefresh.DOM.info.textContent = 'Notification fired!';
+                        AutoRefresh.DOM.info.className = 'alert alert-info alert-dismissable';
+                        AutoRefresh.DOM.info.style.display = '';
+                }
+        }
+}
+
+function notifyPlugins()
+{
+        for (var i = 0; i < AutoRefresh.plugins.length; i++)
+        {
+                var plugin = AutoRefresh.plugins[i];
+                if (plugin.enabled)
+                {
+                        plugin.notify(AutoRefresh.options);
+                }
+        }
+}
+
+function timerLoop()
+{
+        var timer = new Date();
+        refreshClock(timer);
+
+        // timer hit 0
+        if ((timer - AutoRefresh.baseTime)/1000 > AutoRefresh.values.refreshRate)
+        {
+                stopReload();
+                updateOptions();
+                updateFields();                
+                refreshURL();
+                startReload();
+        }
+}
+
+function refreshClock(time)
+{
+        var seconds = (time - AutoRefresh.baseTime)/1000;
+        var secondsRemaining = AutoRefresh.values.refreshRate - seconds;
+        AutoRefresh.DOM.clock.textContent = Math.round(secondsRemaining);
+}
+
+function startReload()
+{
+        updateFields();
+        startNewTime();
+        AutoRefresh.timerID = setInterval(timerLoop, 500);
+
+}
+
+function startNewTime()
+{
+        stopReload();
+        AutoRefresh.baseTime = new Date();
+        refreshClock(AutoRefresh.baseTime);
+}
+
+function stopReload()
+{
+        if (AutoRefresh.timerID != 0)
+        {
+                clearInterval(AutoRefresh.timerID);
+                AutoRefresh.timerID = 0;
+        }
+
+        AutoRefresh.baseTime = 0;
+        refreshClock(AutoRefresh.baseTime);
+}
+
+</script>
+</head>
+
+<body onload='init()'>
+<div class='row row-eq-height'>
+        <div id='controls' class='col-md-6'>
+                <div class='panel panel-default'>
+                        <div class='bg-info'>
+                                <a class='h4' data-toggle='collapse' href="#collapsibleRefresh">                        
+                                        <div class='panel-heading'>
+                                                Refresh settings
+                                        </div>
+                                </a>                                                               
+                        </div>        
+                        <div id='collapsibleRefresh' class='list-group collapse in'>
+                                <div class='list-group-item list-group-item-warning'>
+                                        <span class='btn-group'>
+                                                <button id='start' class='btn btn-primary'>Start Reloading</button>
+                                                <button id='stop' class='btn btn-danger'>Stop Reloading</button>
+                                        </span>
+                                </div>
+                                <div class='form-inline list-group-item list-group-item-warning'>
+                                        <label for='refreshRate' class='control-label'>Refresh Rate</label>                        
+                                        <div class='input-group' style='width:30%'>
+                                                <input id='refreshRate' type='number' class='form-control' size='2'></input>
+                                                <span class='input-group-addon'>seconds</span>
+                                        </div>
+                                </div>
+                                <div class='list-group-item list-group-item-warning'>
+                                        <kbd>Reloading in:</kbd> <span id='clock'></span>
+                                </div>
+                                <div class='list-group-item list-group-item-warning'>
+                                        <div class='input-group'>
+                                                <span class='input-group-addon'>Refresh URL</span>
+                                                <input id='url' type='text' class='form-control'></input>
+                                        </div>
+                                        <div id='info' class='alert alert-dismissable' style='display:none'></div>
+                                </div>
+                        </div>
+                </div>
+                             
+
+                <div class='panel panel-default'>
+                        <div class='bg-info'>
+                                <a class='h4' data-toggle='collapse' href="#collapsibleCode">                        
+                                        <div class='panel-heading text-upper'>
+                                                Code options
+                                        </div>
+                                </a>                                                               
+                        </div>
+                        <div id='collapsibleCode' class='list-group collapse in'>                
+                                <div class='form-inline list-group-item list-group-item-warning'>
+                                        <input type='checkbox' id='async'></input>
+                                        <label for='refreshRate' class='control-label'>After loading, asynchronously check criteria in</label>
+                                        <div class='input-group' style='width:30%'>
+                                                <input type='number' id='asyncTime' size='2' class='form-control'></input>
+                                                <span class='input-group-addon'>seconds</span>
+                                        </div>
+                                </div>
+                                <div class='list-group-item list-group-item-warning'>
+                                        <label for='criteriaEditor'>Notification criteria function</label>
+                                        <h6>AutoRefresh.DOM.iframeDocument supplies iframe's content document</h6>
+                                        <div>
+                                                <div id='criteriaEditor'>
+                                                </div>
+                                        </div>
+                                </div>
+                                <div class='list-group-item list-group-item-warning'>
+                                                <label for='serializedCode' class='control-label'>Base64 serialized criteria code</label>
+                                                <textarea class='form-control' id='serializedCode'></textarea>
+                                                <div>
+                                                        <button class='btn btn-success' id='serialize'>Serialize</button>
+                                                        <button class='btn btn-warning' id='deserialize'>Deserialize</button>
+                                                </div>
+                                        </div>                        
+                                </div>
+                        </div>
+        </div>
+        <div id='plugins' class='col-md-6'>
+                <div class='list-group'>
+                        <div class='panel panel-default list-group-item'>
+                                <div class='bg-info'>
+                                        <div class='panel-heading'>
+                                                <a class='h4' data-toggle='collapse' href="#collapsible">                    
+                                                        Message Body (required for notification)
+                                                </a>                       
+                                        </div>
+                                </div>
+                                <div class='panel-body alert alert-success collapse' id='collapsible'>
+                                        <label for='message' class='control-label'>Message</label>
+                                        <textarea id='message' class='form-control' placeholder='Notification Message'></textarea>
+                                </div>
+                        </div>
+                </div>
+        </div>
+</div>
+<iframe id='iframe'></iframe>
+</body>
