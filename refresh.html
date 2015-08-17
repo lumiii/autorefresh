@@ -331,7 +331,7 @@ function checkCriteria()
 {
         if (AutoRefresh.values.criteria != null)
         {
-                AutoRefresh.DOM.iframeDocument = AutoRefresh.DOM.iframe.contentDocument;
+                AutoRefresh.iDocument = AutoRefresh.DOM.iframe.contentDocument;
                 if (AutoRefresh.values.criteria())
                 {
                         notifyPlugins();
@@ -477,7 +477,7 @@ function showModalDialog(title, body)
                                 </div>
                                 <div class='list-group-item list-group-item-warning'>
                                         <label for='criteriaEditor'>Notification criteria function</label>
-                                        <h6>AutoRefresh.DOM.iframeDocument supplies iframe's content document</h6>
+                                        <h6>AutoRefresh.iDocument supplies iframe's content document</h6>
                                         <div>
                                                 <div id='criteriaEditor'>
                                                 </div>
