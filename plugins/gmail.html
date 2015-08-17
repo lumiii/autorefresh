@@ -51,7 +51,7 @@
         var authorizeDiv = document.getElementById('authorize-div');
         if (authResult && !authResult.error) {
           // Hide auth UI, then load client library.
-          authorizeDiv.style.display = 'none';
+          authorizeDiv.textContent = 'Authorized!';
           loadGmailApi();
         } else {
           // Show auth UI, allowing the user to initiate authorization by
@@ -116,7 +116,7 @@
         </button>
         to authorize access to Gmail API</div>
       <div>Required for this notification method</div>
-      <div>If this message does not show up, you have already authorized access</div>
+      <div>If this message does not show up, you have already authorized access.</div>
     </div>
   </body>
 </html>

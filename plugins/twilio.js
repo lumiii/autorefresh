@@ -150,13 +150,29 @@ function twilioVerifyNumber()
 	htmlStr += "</div>";
 	htmlStr += "</div>";
 
+	var helpStr = "<h5>";
+	helpStr += "<p>";
+	helpStr += "This plugin allows you to text your cell phone for notification. ";
+	helpStr += "Only US and Canada numbers are currently supported.";
+	helpStr += "</p>";
+	helpStr += "<p>";
+	helpStr += "Before first use, you must verify your number. First select the country of your number, ";
+	helpStr += "and enter your number in the schema +1[areacode][number], then click Verify Number. ";
+	helpStr += "A verification code should show, and you will receive a phone call to enter that code.";
+	helpStr += "</p>";
+	helpStr += "<p>";
+	helpStr += "Your phone number should be authorized to receive text notifications afterwards. ";
+	helpStr += "Don't forget to test it first!";
+	helpStr += "</p>";
+	helpStr += "</h5>";
+
 	d.innerHTML = htmlStr;
 
 	var b = d.querySelector('#twilioVerify');
 	b.addEventListener('click', updateOptions);
 	b.addEventListener('click', twilioVerifyNumber);
 
-	registerPlugin(twilioFireText, d, 'SMS');
+	registerPlugin(twilioFireText, d, 'SMS', helpStr);
 	registerField('SMS', 'country', 'twilioRegion');
 	registerField('SMS', 'to', 'twilioNumber');
 })();

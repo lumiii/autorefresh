@@ -258,13 +258,14 @@ function registerField(module, name, id)
         AutoRefresh.optionFields.push(field);
 }
 
-function registerPlugin(plugin, element, title)
+function registerPlugin(plugin, element, title, helpHTML)
 {
         var newPlugin = {}
         newPlugin.enabled = false;
         newPlugin.notify = plugin;
 
         var nextID = getNextCollapsibleID();
+        var helpExists = (helpHTML != null) && (helpHTML != undefined);
 
         var d = document.createElement('div');
         d.className = 'panel panel-default list-group-item';
@@ -274,6 +275,10 @@ function registerPlugin(plugin, element, title)
         htmlStr += "<label class='checkbox-inline' style='float:left'>";
         htmlStr += "<input type='checkbox' data-toggle='toggle' data-size='mini'></input>";
         htmlStr += "</label>";
+        if (helpExists)
+        {
+                htmlStr += "<a class='label label-success' style='float:right' href='#'>Help</a>";
+        }
         htmlStr += "<a class='h4' data-toggle='collapse' href='#" + nextID + "'>";
         htmlStr += "<div>";
         htmlStr += title;
@@ -286,6 +291,14 @@ function registerPlugin(plugin, element, title)
         htmlStr += "</div>";
 
         d.innerHTML = htmlStr;
+
+        if (helpExists)
+        {
+                var helpButton = d.querySelector('a.label.label-success');
+                helpButton.onclick = function(){
+                        showModalDialog(title + " notification help", helpHTML);
+                }
+        }
 
         var body = d.querySelector('.panel-body');
         body.appendChild(element);
@@ -306,6 +319,7 @@ function registerPlugin(plugin, element, title)
 
         newPlugin.toggleElement = heading.querySelector('input[type=checkbox]');
         $(newPlugin.toggleElement).bootstrapToggle();
+
         AutoRefresh.plugins.push(newPlugin);
 }
 
@@ -488,7 +502,8 @@ function showModalDialog(title, body)
                                 </div>
                                 <div class='panel-body alert alert-success collapse' id='collapsible'>
                                         <label for='message' class='control-label'>Message</label>
-                                        <textarea id='message' class='form-control' placeholder='Notification Message'></textarea>
+                                        <textarea id='message' class='form-control' 
+                                                placeholder='Notification Message'>Notification Message</textarea>
                                 </div>
                         </div>
                 </div>
