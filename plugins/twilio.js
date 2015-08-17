@@ -89,16 +89,14 @@ function twilioFireText(options)
 	}
 }
 
-function displayVerificationCode(res)
+function showTwilioDialog(title, bodyText)
 {
-	var code = res.validation_code;
-	var title = 'SMS verification code';
 	var body = "<div class='jumbotron' style='text-align:center'>";
 	body += "<h3>Enter verification code:</h3>";
-	body += "<h1>" + code + "</h1>";
+	body += "<h1>" + bodyText + "</h1>";
 	body += "</div>";
 
-	showModalDialog(title, body);
+	showModalDialog(title, body);	
 }
 
 function twilioVerifyNumber()
@@ -119,8 +117,15 @@ function twilioVerifyNumber()
 		{
 			if (xhr.readyState == xhr.DONE)
 			{
-				var j = JSON.parse(xhr.responseText);
-				displayVerificationCode(j);
+				var j = JSON.parse(xhr.responseText);				
+				if (xhr.status == 200)
+				{
+					showTwilioDialog('SMS verification code', j.validation_code);
+				}
+				else
+				{
+					showTwilioDialog('Error', j.message);
+				}
 			}
 		};
 		xhr.setRequestHeader('Accept', 'application/json');
