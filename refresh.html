@@ -262,16 +262,19 @@ function registerPlugin(plugin, element, title)
         d.className = 'panel panel-default list-group-item';
 
         var htmlStr = "<div class='bg-info'>";
-        htmlStr += "<div class='panel-heading'>";
-        htmlStr += "<label class='checkbox-inline' style='float:left'>";
-        htmlStr += "<input type='checkbox' data-toggle='toggle' data-size='mini'></input>";
+        htmlStr += "<div class='panel-heading' style='position: absolute'>";
+        htmlStr += "<label class='checkbox-inline'>";
+        htmlStr += "<input type='checkbox' data-toggle='toggle' data-size='mini' ></input>";
         htmlStr += "</label>";
-        htmlStr += "<a class='h4' data-toggle='collapse' href='#" + nextID + "'>";
-        htmlStr += "<div>";
+        htmlStr += "</div>";
+        htmlStr += "<a class='h4' data-toggle='collapse' href='#" + nextID + "'>";    
+        htmlStr += "<div class='panel-heading' style='margin-left: 40px'>";
+
+
         htmlStr += title;
+
         htmlStr += "</div>";
-        htmlStr += "</a>";
-        htmlStr += "</div>";
+        htmlStr += "</a>";        
         htmlStr += "</div>";
 
         htmlStr += "<div class='panel-body alert alert-success collapse' id='" + nextID + "'>";
@@ -463,7 +466,7 @@ function stopReload()
                 <div class='list-group'>
                         <div class='panel panel-default list-group-item'>
                                 <div class='bg-info'>
-                                        <a class='h4' data-toggle='collapse' href='#collapsible'>
+                                        <a class='h4' data-toggle='collapse' href="#collapsible">
                                                 <div class='panel-heading'>
                                                         Message Body (required for notification)
                                                 </div>
