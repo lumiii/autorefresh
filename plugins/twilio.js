@@ -93,8 +93,8 @@ function displayVerificationCode(res)
 {
 	var code = res.validation_code;
 	var title = 'SMS verification code';
-	var body = "<div class='jumbotron'>";
-	body += "Enter verification code:";
+	var body = "<div class='jumbotron' style='text-align:center'>";
+	body += "<h3>Enter verification code:</h3>";
 	body += "<h1>" + code + "</h1>";
 	body += "</div>";
 
