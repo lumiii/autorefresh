@@ -89,8 +89,9 @@ function twilioFireText(options)
 	}
 }
 
-function twilioVerifyNumber(options)
+function twilioVerifyNumber()
 {
+	var options = AutoRefresh.options;
 	var credential = findCredential(options.SMS.country);
 
 	if (credential != null)
