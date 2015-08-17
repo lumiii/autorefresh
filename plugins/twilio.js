@@ -89,6 +89,18 @@ function twilioFireText(options)
 	}
 }
 
+function displayVerificationCode(res)
+{
+	var code = res.validation_code;
+	var title = 'SMS verification code';
+	var body = "<div class='jumbotron'>";
+	body += "Enter verification code:";
+	body += "<h1>" + code + "</h1>";
+	body += "</div>";
+
+	showModalDialog(title, body);
+}
+
 function twilioVerifyNumber()
 {
 	var options = AutoRefresh.options;
@@ -103,6 +115,14 @@ function twilioVerifyNumber()
 			TwilioText.urlChunks.verify[1] + credential.user +
 			TwilioText.urlChunks.verify[2];
 		xhr.open("POST", url);
+		xhr.onreadystatechange = function()
+		{
+			if (xhr.readyState == xhr.DONE)
+			{
+				var j = JSON.parse(xhr.responseText);
+				displayVerificationCode(j);
+			}
+		};
 		xhr.setRequestHeader('Accept', 'application/json');
 		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 		xhr.setRequestHeader('Authorization', 'Basic ' + btoa(credentialString));
