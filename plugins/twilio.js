@@ -16,14 +16,19 @@ TwilioText.credentials =
 	}
 ];
 
-TwilioText.urlChunks = 
-[
+TwilioText.urlChunks = {};
+TwilioText.urlChunks.text = [
 	"https://",
 	"@api.twilio.com/2010-04-01/Accounts/",
 	"/Messages.json"
-]
+];
+TwilioText.urlChunks.verify = [
+	"https://",
+	"@api.twilio.com/2010-04-01/Accounts/",
+	"/OutgoingCallerIds.json"
+];
 
-function constructBody(options)
+function constructTextBody(options)
 {
 	var credential = findCredential(options.SMS.country);
 	var body = options.message;
@@ -37,6 +42,11 @@ function constructBody(options)
 		"From=" + encodeURIComponent(credential.number);
 
 	return str;
+}
+
+function constructVerifyBody(options)
+{
+	return "PhoneNumber=" + encodeURIComponent(options.SMS.to);
 }
 
 function credString(credential)
@@ -68,15 +78,35 @@ function twilioFireText(options)
 		var xhr = new XMLHttpRequest();
 		var credentialString = credString(credential);
 		var url = 
-			TwilioText.urlChunks[0] + credentialString +
-			TwilioText.urlChunks[1] + credential.user +
-			TwilioText.urlChunks[2];
+			TwilioText.urlChunks.text[0] + credentialString +
+			TwilioText.urlChunks.text[1] + credential.user +
+			TwilioText.urlChunks.text[2];
 		xhr.open("POST", url);
 		xhr.setRequestHeader('Accept', 'application/json');
 		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 		xhr.setRequestHeader('Authorization', 'Basic ' + btoa(credentialString));
-		xhr.send(constructBody(options));
+		xhr.send(constructTextBody(options));
 	}
+}
+
+function twilioVerifyNumber(options)
+{
+	var credential = findCredential(options.SMS.country);
+
+	if (credential != null)
+	{
+		var xhr = new XMLHttpRequest();
+		var credentialString = credString(credential);
+		var url = 
+			TwilioText.urlChunks.verify[0] + credentialString +
+			TwilioText.urlChunks.verify[1] + credential.user +
+			TwilioText.urlChunks.verify[2];
+		xhr.open("POST", url);
+		xhr.setRequestHeader('Accept', 'application/json');
+		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+		xhr.setRequestHeader('Authorization', 'Basic ' + btoa(credentialString));
+		xhr.send(constructVerifyBody(options));
+	}	
 }
 
 (function()
@@ -98,7 +128,8 @@ function twilioFireText(options)
 
 	d.innerHTML = htmlStr;
 
-	registerPlugin(twilioFireText, d, 'SMS');
+	//registerPlugin(twilioFireText, d, 'SMS');
+	registerPlugin(twilioVerifyNumber, d, 'SMS');
 	registerField('SMS', 'country', 'twilioRegion');
 	registerField('SMS', 'to', 'twilioNumber');
 })();
