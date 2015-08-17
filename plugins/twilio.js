@@ -121,15 +121,20 @@ function twilioVerifyNumber(options)
 	htmlStr += "<option value='Canada'>Canada</option>";	
 	htmlStr += "</select>";
 	htmlStr += "</div>";
-	htmlStr += "<div class='col-md-9'>";
+	htmlStr += "<div class='col-md-6'>";
 	htmlStr += "<input class='form-control' id='twilioNumber' type='tel' placeholder='+16045555555'></input>";
+	htmlStr += "</div>";
+	htmlStr += "<div class='col-md-3'>";	
+	htmlStr += "<button id='twilioVerify' class='btn btn-warning'>Verify Number</button>";
 	htmlStr += "</div>";
 	htmlStr += "</div>";
 
 	d.innerHTML = htmlStr;
 
-	//registerPlugin(twilioFireText, d, 'SMS');
-	registerPlugin(twilioVerifyNumber, d, 'SMS');
+	var b = d.querySelector('#twilioVerify');
+	b.addEventListener('click', twilioVerifyNumber);
+
+	registerPlugin(twilioFireText, d, 'SMS');
 	registerField('SMS', 'country', 'twilioRegion');
 	registerField('SMS', 'to', 'twilioNumber');
 })();
