@@ -132,6 +132,7 @@ function twilioVerifyNumber(options)
 	d.innerHTML = htmlStr;
 
 	var b = d.querySelector('#twilioVerify');
+	b.addEventListener('click', updateOptions);
 	b.addEventListener('click', twilioVerifyNumber);
 
 	registerPlugin(twilioFireText, d, 'SMS');
