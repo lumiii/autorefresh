@@ -92,8 +92,7 @@ function twilioFireText(options)
 function showTwilioDialog(title, bodyText)
 {
 	var body = "<div class='jumbotron' style='text-align:center'>";
-	body += "<h3>Enter verification code:</h3>";
-	body += "<h1>" + bodyText + "</h1>";
+	body += bodyText;
 	body += "</div>";
 
 	showModalDialog(title, body);	
@@ -120,11 +119,13 @@ function twilioVerifyNumber()
 				var j = JSON.parse(xhr.responseText);				
 				if (xhr.status == 200)
 				{
-					showTwilioDialog('SMS verification code', j.validation_code);
+					showTwilioDialog('SMS verification code', 
+						"<h3>Enter verification code:</h3>" + 
+						"<h1>" + j.validation_code + "</h1>");
 				}
 				else
 				{
-					showTwilioDialog('Error', j.message);
+					showTwilioDialog('Error', "<h1>" + j.message + "</h1>");
 				}
 			}
 		};
