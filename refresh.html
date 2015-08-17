@@ -333,7 +333,7 @@ function checkCriteria()
         if (AutoRefresh.values.criteria != null)
         {
                 iDocument = AutoRefresh.DOM.iframe.contentDocument;
-                if (AutoRefresh.values.criteria())
+                if (AutoRefresh.values.criteria() === true)
                 {
                         notifyPlugins();
                         // TODO: make this optional
