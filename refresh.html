@@ -99,8 +99,7 @@ function loadAllModules()
 {
         for (var i = 0; i < AutoRefresh.availPlugins.length; i++)
         {
-
-                $.getScript(AutoRefresh.baseURL + AutoRefresh.availPlugins[i] + '.js');
+                addScript(AutoRefresh.baseURL + AutoRefresh.availPlugins[i] + '.js');
         }
 }
 
@@ -397,6 +396,10 @@ function stopReload()
                         </div>        
                         <div id='collapsibleRefresh' class='list-group collapse in'>
                                 <div class='list-group-item list-group-item-warning'>
+                                        <span class='label label-primary'>Reloading in:</span> 
+                                        <span id='clock' class='badge'></span>
+                                </div>                        
+                                <div class='list-group-item list-group-item-warning'>
                                         <span class='btn-group'>
                                                 <button id='start' class='btn btn-primary'>Start Reloading</button>
                                                 <button id='stop' class='btn btn-danger'>Stop Reloading</button>
@@ -408,10 +411,7 @@ function stopReload()
                                                 <input id='refreshRate' type='number' class='form-control' size='2'></input>
                                                 <span class='input-group-addon'>seconds</span>
                                         </div>
-                                </div>
-                                <div class='list-group-item list-group-item-warning'>
-                                        <span class='label label-primary'>Reloading in:</label> <span id='clock' class='badge'></span>
-                                </div>
+                                </div
                                 <div class='list-group-item list-group-item-warning'>
                                         <div class='input-group'>
                                                 <span class='input-group-addon'>Refresh URL</span>
