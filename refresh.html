@@ -67,6 +67,7 @@
 <script src="https://rawgit.com/ajaxorg/ace-builds/master/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <script>
 var localTest = false;
+var iDocument = null;
 var AutoRefresh = {};
 // storage of DOM elements
 AutoRefresh.DOM = {};
@@ -331,7 +332,7 @@ function checkCriteria()
 {
         if (AutoRefresh.values.criteria != null)
         {
-                AutoRefresh.iDocument = AutoRefresh.DOM.iframe.contentDocument;
+                iDocument = AutoRefresh.DOM.iframe.contentDocument;
                 if (AutoRefresh.values.criteria())
                 {
                         notifyPlugins();
@@ -341,6 +342,7 @@ function checkCriteria()
                         AutoRefresh.DOM.info.className = 'alert alert-info alert-dismissable';
                         AutoRefresh.DOM.info.style.display = '';
                 }
+                iDocument = null;
         }
 }
 
@@ -477,7 +479,7 @@ function showModalDialog(title, body)
                                 </div>
                                 <div class='list-group-item list-group-item-warning'>
                                         <label for='criteriaEditor'>Notification criteria function</label>
-                                        <h6>AutoRefresh.iDocument supplies iframe's content document</h6>
+                                        <h6>variable <code>iDocument</code> supplies iframe's content document</h6>
                                         <div>
                                                 <div id='criteriaEditor'>
                                                 </div>
