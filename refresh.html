@@ -296,7 +296,7 @@ function registerPlugin(plugin, element, title, helpHTML)
         htmlStr += "</div>";
         htmlStr += "</div>";
 
-        htmlStr += "<div class='panel-body alert alert-success collapse' id='" + nextID + "'>";
+        htmlStr += "<div class='panel-body alert alert-success collapse in' id='" + nextID + "'>";
         htmlStr += "</div>";
 
         d.innerHTML = htmlStr;
@@ -337,7 +337,19 @@ function checkCriteria()
         if (AutoRefresh.values.criteria != null)
         {
                 iDocument = AutoRefresh.DOM.iframe.contentDocument;
-                if (AutoRefresh.values.criteria() === true)
+                var results = false;
+
+                try
+                {
+                        results = AutoRefresh.values.criteria();
+                }
+                catch(e)
+                {
+                        results = false;
+                        showModalDialog('Scripting error!', '<h1><p>Error Message</p><p>' + e.message + '</p></h1>');
+                }
+
+                if (results === true)
                 {
                         notifyPlugins();
                         // TODO: make this optional
