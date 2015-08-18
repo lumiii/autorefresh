@@ -249,12 +249,12 @@ function updateOptions()
 function serializeScript()
 {
         var s = AutoRefresh.criteriaEditor.getValue();
-        AutoRefresh.DOM.serializedCode.value = btoa(s);
+        AutoRefresh.DOM.serializedCode.value = btoa(unescape(encodeURIComponent(s)));
 }
 
 function deserializeScript()
 {
-        var s = atob(AutoRefresh.DOM.serializedCode.value);
+        var s = decodeURIComponent(escape(atob(AutoRefresh.DOM.serializedCode.value)));
         AutoRefresh.criteriaEditor.setValue(s);
 }
 
