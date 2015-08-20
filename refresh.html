@@ -284,6 +284,9 @@ function registerPlugin(plugin, element, title, helpHTML)
         htmlStr += "<label class='checkbox-inline' style='float:left'>";
         htmlStr += "<input type='checkbox' data-toggle='toggle' data-size='mini'></input>";
         htmlStr += "</label>";
+        htmlStr += "<a data-toggle='collapse' href='#" + nextID + "'>";
+        htmlStr += "<span class='glyphicon glyphicon-chevron-down' style='float:right'></span>";
+        htmlStr += "</a>";
         if (helpExists)
         {
                 htmlStr += "<a class='label label-success' style='float:right' href='#'>Help</a>";
@@ -296,7 +299,7 @@ function registerPlugin(plugin, element, title, helpHTML)
         htmlStr += "</div>";
         htmlStr += "</div>";
 
-        htmlStr += "<div class='panel-body alert alert-success collapse in' id='" + nextID + "'>";
+        htmlStr += "<div class='panel-body alert alert-success collapse' id='" + nextID + "'>";
         htmlStr += "</div>";
 
         d.innerHTML = htmlStr;
@@ -518,6 +521,7 @@ function showModalDialog(title, body)
                                 <div class='bg-info'>
                                         <a class='h4' data-toggle='collapse' href='#collapsible'>
                                                 <div class='panel-heading'>
+                                                        <span class='glyphicon glyphicon-chevron-down' style='float:right'></span>
                                                         Message Body (required for notification)
                                                 </div>
                                         </a>                       
