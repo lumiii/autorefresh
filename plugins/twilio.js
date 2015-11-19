@@ -6,7 +6,7 @@ TwilioText.credentials =
 		country: "US",
 		user: "ACcb57a62cca15e227defe2d707ee4f5fb",
 		pass: "b0c037f699173482ffc1a9e9e6028e95",
-		number: "+13237458789"
+		number: "+14805258275"
 	},
 	{
 		country: "Canada",
